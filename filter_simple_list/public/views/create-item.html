@@ -1,0 +1,8 @@
+
+<div class="create-item">
+    <form hx-post="/items" hx-target="#item-list" hx-swap="afterbegin">
+        <input type="text" id="name" name="name" required minlength="4" maxlength="8" size="10" />
+        <button type="submit">Create</button>
+    </form>
+</div>
+
