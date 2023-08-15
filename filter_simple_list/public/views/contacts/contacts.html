@@ -1,0 +1,31 @@
+{{block "contacts" .}}
+<div hx-boost="true">
+    {{template "create-contact" }}
+    {{range .Contacts}}
+        <div class="contact">
+            <div class="contact_name">{{.Name}}</div>
+            <div class="contact_phone">{{.Phone}}</div>
+            <div class="contact_email">{{.Email}}</div>
+    {{end}}
+</div>
+{{end}}
+
+{{block "create-contact" .}}
+    <form {{if .}}hx-put="/contact/{{.Id}}"{{else}}hx-post="/contact"{{end}}>
+    <label for="name">Name</label>
+    <input name="name" {{if .}}value="{{ .Name }}" {{end}} placeholder="John Doe" />
+
+    <label for="email">Email</label>
+    <input name="email" {{if .}}value="{{ .Email }}" {{end}} placeholder="example@foo.com" />
+
+    <label for="phone">Email</label>
+    <input name="phone" {{if .}}value="{{ .Phone }}" {{end}} placeholder="(555) 555 - 5555" />
+
+    <label for="addr1">Address Line 1</label>
+    <input name="addr1" {{if .}}value="{{ .AddressLine1 }}" {{end}} placeholder="Address Line 1" />
+
+    <label for="addr2">Address Line 2</label>
+    <input name="addr2" {{if .}}value="{{ .AddressLine2 }}" {{end}} placeholder="Address Line 2" />
+</form>
+
+{{end}}

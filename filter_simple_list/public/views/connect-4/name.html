@@ -1,0 +1,28 @@
+{{ block "name" . }}
+<div id="name">
+    {{if .}}
+        {{template "has-name" .}}
+    {{else}}
+        {{template "set-name"}}
+    {{end}}
+</div>
+{{end}}
+
+{{ block "has-name" . }}
+Welcome {{ .Name }}!
+<form
+    hx-delete="/name/{{.Name}}"
+    hx-target="#name"
+    hx-swap="outerHTML">
+    <button type="submit">Delete Name</button>
+{{end}}
+
+{{ block "set-name" . }}
+<form hx-swap="outerHTML" hx-post="/name" hx-target="#name">
+    <label for="name">Name:</label>
+    <input type="text" name="name" placeholder="Enter your name" />
+    {{if .Error}}
+        <div class="error">{{.Error}}</div>
+    {{end}}
+</form>
+{{end}}
