@@ -1,8 +1,12 @@
-{{block "contacts" .}}
-<div>
-    Help!
-</div>
+{{block "help" .}}
+<!DOCTYPE html>
+<html lang="en">
+    {{ template "header" . }}
+    <body>
+        <div id="content">
+            {{ template "nav" . }}
+            Help!
+        </div>
+    </body>
+</html>
 {{end}}
-
-
-

@@ -33,6 +33,14 @@ func main() {
 
     e.GET("/", endpoints.HandleIndex)
 
+    e.GET("/contacts", endpoints.HandleIndex)
+
+    e.GET("/contacts/new", endpoints.HandleNewContact)
+    e.POST("/contacts/new", endpoints.HandleCreateContact)
+
+    e.GET("/settings", endpoints.HandleSettings)
+    e.GET("/help", endpoints.HandleHelp)
+
     e.Logger.Fatal(e.Start(":42069"))
 }
 

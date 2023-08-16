@@ -1,9 +1,12 @@
-
-{{block "contacts" .}}
-<div>
-    Settings!
-</div>
+{{block "settings" .}}
+<!DOCTYPE html>
+<html lang="en">
+    {{ template "header" . }}
+    <body hx-boost="true">
+        <div id="content">
+            {{ template "nav" . }}
+            Settings!
+        </div>
+    </body>
+</html>
 {{end}}
-
-
-

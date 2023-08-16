@@ -16,9 +16,22 @@ type Contact struct {
     Id int
 }
 
+type Header struct {
+    Title string
+}
+
 type ContactPage struct {
+    Header
     Contacts []Contact
 }
+
+type NewContactPage struct {
+    Header
+    Contact *Contact
+    Existing bool
+    Errors map[string]string
+}
+
 
 func HandleIndex(c echo.Context) error {
     res, err := database.Db.Query("SELECT * FROM contacts")
@@ -53,31 +66,89 @@ func HandleIndex(c echo.Context) error {
     }
 
     return c.Render(200, "index.html", ContactPage {
+        Header: Header{
+            Title: "Contacts",
+        },
         Contacts: contacts,
     })
 }
 
-type Name struct {
-    Name string
+func HandleCreateContact(c echo.Context) error {
+    name := c.FormValue("name")
+    email := c.FormValue("email")
+    addressLine1 := c.FormValue("addr1")
+    addressLine2 := c.FormValue("addr2")
+    phone := c.FormValue("phone")
+
+    var errors map[string]string = make(map[string]string)
+    if name == "" {
+        errors["name"] = "Name is required"
+    }
+
+    if email == "" {
+        errors["email"] = "Email is required"
+    }
+
+    if  addressLine1 == "" {
+        errors["addr1"] = "Address Line 1 is required"
+    }
+
+    if addressLine2 == "" {
+        errors["addr2"] = "Address Line 2 is required"
+    }
+
+    if phone == "" {
+        errors["phone"] = "Phone is required"
+    }
+
+    if len(errors) > 0 {
+        c.Logger().Errorf("missing required fields")
+        return c.Render(http.StatusOK, "new-contact", NewContactPage{
+            Header: Header{
+                Title: "Create Contact",
+            },
+            Contact: &Contact{
+                Name: name,
+                AddressLine1: addressLine1,
+                AddressLine2: addressLine2,
+                Email: email,
+                Phone: phone,
+            },
+            Existing: false,
+            Errors: errors,
+        })
+    }
+
+    _, err := database.Db.Exec(`INSERT INTO contacts (name, email, addressLine1, addressLine2, phone) VALUES (?, ?, ?, ?, ?)`, name, email, addressLine1, addressLine2, phone)
+
+    if err != nil {
+        c.Logger().Errorf("could not insert into db: %+v", err)
+        return c.String(http.StatusInternalServerError, "")
+    }
+
+    return c.Redirect(http.StatusFound, "/")
 }
 
-func HandleCreateName(c echo.Context) error {
-    if database.Db == nil {
-        c.Logger().Error("db is nil")
-        return c.String(http.StatusTeapot, "youu suck")
-    }
+func HandleNewContact(c echo.Context) error {
+    return c.Render(200, "new-contact", NewContactPage{
+        Header: Header{
+            Title: "Create Contact",
+        },
+        Contact: nil,
+        Existing: false,
+        Errors: map[string]string{},
+    })
+}
 
-    name := c.FormValue("name")
-    res := database.Db.QueryRow("SELECT * FROM users WHERE name = ?", name)
+func HandleSettings(c echo.Context) error {
+    return c.Render(200, "settings", Header{
+        Title: "Settings",
+    })
+}
 
-    var rowName string
-    err := res.Scan(&rowName)
-    if err == nil {
-        return err
-    }
-
-    return c.Render(200, "name", Name{
-        Name: name,
+func HandleHelp(c echo.Context) error {
+    return c.Render(200, "help", Header{
+        Title: "Help",
     })
 }
 

@@ -1,7 +1,8 @@
 package database
 
 import (
-    "database/sql"
+	"database/sql"
+
 	_ "github.com/libsql/libsql-client-go/libsql"
 	_ "modernc.org/sqlite"
 )
@@ -34,14 +35,18 @@ func InitContacts(url string) error {
     }
 
     // Real gross, but guess what, we are doing database initialization here
-    db.Exec(`CREATE TABLE IF NOT EXISTS contacts (
+    _, err = db.Exec(`CREATE TABLE IF NOT EXISTS contacts (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             email TEXT NOT NULL,
             addressLine1 TEXT NOT NULL,
             addressLine2 TEXT NOT NULL,
-            phone TEXT NOT NULL,
+            phone TEXT NOT NULL
         )`)
+
+    if err != nil {
+        return err
+    }
 
     Db = db
 

@@ -1,5 +1,5 @@
 
-{{block "header" .}}
+{{block "nav" .}}
 <div id="header">
     <a href="/contacts" hx-boost="true">Contacts</a>
     <a href="/settings" hx-boost="true">Settings</a>
@@ -7,4 +7,12 @@
 </div>
 {{end}}
 
-
+{{block "header" .}}
+    <head>
+        <title>{{ .Title }}</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/style.css" rel="stylesheet">
+        <script src="https://unpkg.com/htmx.org@1.9.4" integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV" crossorigin="anonymous"></script>
+    </head>
+{{end}}
