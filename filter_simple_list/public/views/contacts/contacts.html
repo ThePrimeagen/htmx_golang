@@ -1,12 +1,22 @@
 {{block "contacts" .}}
 <div hx-boost="true" id="content">
     <a href="/contacts/new">Create Contact</a>
-    {{range .Contacts}}
-        <div class="contact">
-            <div class="contact_name">{{.Name}}</div>
-            <div class="contact_phone">{{.Phone}}</div>
-            <div class="contact_email">{{.Email}}</div>
-    {{end}}
+    <div class="flex-row">
+        <div class="flex gap-2">
+            <div>Name</div>
+            <div>Phone</div>
+            <div>Email</div>
+        </div>
+        {{range .Contacts}}
+            <div class="flex gap-2" id="contact-{{.Id}}">
+                <div>{{.Name}}</div>
+                <div>{{.Phone}}</div>
+                <div>{{.Email}}</div>
+                <a href="/contacts/{{.Id}}">Edit</a>
+                <button hx-swap="outerHTML" hx-target="#contact-{{.Id}}" hx-delete="/contacts/{{.Id}}">Delete</button>
+            </div>
+        {{end}}
+    </div>
 </div>
 {{end}}
 
@@ -17,54 +27,66 @@
     <body>
         {{ template "nav" . }}
         <div id="content">
-            <form hx-target="body" hx-push-url="true" {{if .Existing}}hx-put="/contacts/{{ .Contact.Id }}"{{else}}hx-post="/contacts/new"{{end}}>
-                <label for="name">Name</label>
-                <input name="name" {{if .Contact}}value="{{ .Contact.Name }}" {{end}} placeholder="John Doe" />
+            <form hx-target="body" hx-push-url="true" {{if .Existing }}hx-put="/contacts/{{ .Contact.Id }}"{{else}}hx-post="/contacts/new"{{end}}>
+                <p class="m-2">
+                    <label for="name">Name</label>
+                    <input name="name" {{if .Contact}}value="{{ .Contact.Name }}" {{end}} placeholder="John Doe" />
 
-                {{ if .Errors.name }}
-                <div class="error">
-                        {{ .Errors.name }}
-                </div>
-                {{end}}
+                    {{ if .Errors.name }}
+                    <div class="error text-red-600">
+                            {{ .Errors.name }}
+                    </div>
+                    {{end}}
+                </p>
 
-                <label for="email">Email</label>
-                <input name="email" {{if .Contact}}value="{{ .Contact.Email }}" {{end}} placeholder="example@foo.com" />
+                <p class="m-2">
+                    <label for="email">Email</label>
+                    <input name="email" {{if .Contact}}value="{{ .Contact.Email }}" {{end}} placeholder="example@foo.com" />
 
-                {{ if .Errors.email }}
-                <div class="error">
-                        {{ .Errors.email }}
-                </div>
-                {{end}}
-
-
-                <label for="phone">Phone</label>
-                <input name="phone" {{if .Contact}}value="{{ .Contact.Phone }}" {{end}} placeholder="(555) 555 - 5555" />
-                {{ if .Errors.phone }}
-                <div class="error">
-                        {{ .Errors.phone }}
-                </div>
-                {{end}}
+                    {{ if .Errors.email }}
+                    <div class="error">
+                            {{ .Errors.email }}
+                    </div>
+                    {{end}}
+                </p>
 
 
-                <label for="addr1">Address Line 1</label>
-                <input name="addr1" {{if .Contact}}value="{{ .Contact.AddressLine1 }}" {{end}} placeholder="Address Line 1" />
-                {{ if .Errors.addr1 }}
-                <div class="error">
-                        {{ .Errors.addr1 }}
-                </div>
-                {{end}}
+                <p class="m-2">
+                    <label for="phone">Phone</label>
+                    <input name="phone" {{if .Contact}}value="{{ .Contact.Phone }}" {{end}} placeholder="(555) 555 - 5555" />
+                    {{ if .Errors.phone }}
+                    <div class="error">
+                            {{ .Errors.phone }}
+                    </div>
+                    {{end}}
+                </p>
 
 
-                <label for="addr2">Address Line 2</label>
-                <input name="addr2" {{if .Contact}}value="{{ .Contact.AddressLine2 }}" {{end}} placeholder="Address Line 2" />
-                {{ if .Errors.addr2 }}
-                <div class="error">
-                        {{ .Errors.addr2 }}
-                </div>
-                {{end}}
+                <p class="m-2">
+                    <label for="addr1">Address Line 1</label>
+                    <input name="addr1" {{if .Contact}}value="{{ .Contact.AddressLine1 }}" {{end}} placeholder="Address Line 1" />
+                    {{ if .Errors.addr1 }}
+                    <div class="error">
+                            {{ .Errors.addr1 }}
+                    </div>
+                    {{end}}
+                </p>
 
 
-                <button type="submit">Create</button>
+                <p class="m-2">
+                    <label for="addr2">Address Line 2</label>
+                    <input name="addr2" {{if .Contact}}value="{{ .Contact.AddressLine2 }}" {{end}} placeholder="Address Line 2" />
+                    {{ if .Errors.addr2 }}
+                    <div class="error">
+                            {{ .Errors.addr2 }}
+                    </div>
+                    {{end}}
+                </p>
+
+
+                <p class="m-2">
+                    <button type="submit">{{if .Existing}}Save{{else}}Create{{end}}</button>
+                </p>
             </form>
         <div>
     </body>

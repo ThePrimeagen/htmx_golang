@@ -37,6 +37,9 @@ func main() {
 
     e.GET("/contacts/new", endpoints.HandleNewContact)
     e.POST("/contacts/new", endpoints.HandleCreateContact)
+    e.DELETE("/contacts/:id", endpoints.HandleDeleteContact)
+    e.GET("/contacts/:id", endpoints.HandleEditContact)
+    e.PUT("/contacts/:id", endpoints.HandleCreateContact)
 
     e.GET("/settings", endpoints.HandleSettings)
     e.GET("/help", endpoints.HandleHelp)

@@ -2,19 +2,11 @@ package endpoints
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"theprimeagen.tv/filter_simple_list/pkg/database"
 )
-
-type Contact struct {
-    Name string
-    AddressLine1 string
-    AddressLine2 string
-    Email string
-    Phone string
-    Id int
-}
 
 type Header struct {
     Title string
@@ -22,47 +14,21 @@ type Header struct {
 
 type ContactPage struct {
     Header
-    Contacts []Contact
+    Contacts []database.Contact
 }
 
 type NewContactPage struct {
     Header
-    Contact *Contact
+    Contact *database.Contact
     Existing bool
     Errors map[string]string
 }
 
 
 func HandleIndex(c echo.Context) error {
-    res, err := database.Db.Query("SELECT * FROM contacts")
+    contacts, err := database.GetContacts()
     if err != nil {
-        c.Logger().Errorf("Could not query the db %+v", err)
-        return c.String(http.StatusInternalServerError, "")
-    }
-
-    var contacts []Contact = make([]Contact, 0)
-    for res.Next() {
-        var name string
-        var email string
-        var addressLine1 string
-        var addressLine2 string
-        var phone string
-        var id int
-
-        err := res.Scan(&id, &name, &email, &addressLine1, &addressLine2, &phone)
-        if err != nil {
-            c.Logger().Errorf("could not scan: %+v", err)
-            return c.String(http.StatusInternalServerError, "")
-        }
-
-        contacts = append(contacts, Contact{
-            Name: name,
-            AddressLine1: addressLine1,
-            AddressLine2: addressLine2,
-            Phone: phone,
-            Email: email,
-            Id: id,
-        })
+        return c.String(http.StatusInternalServerError, "unable to get contacts")
     }
 
     return c.Render(200, "index.html", ContactPage {
@@ -73,32 +39,55 @@ func HandleIndex(c echo.Context) error {
     })
 }
 
-func HandleCreateContact(c echo.Context) error {
-    name := c.FormValue("name")
-    email := c.FormValue("email")
-    addressLine1 := c.FormValue("addr1")
-    addressLine2 := c.FormValue("addr2")
-    phone := c.FormValue("phone")
-
-    var errors map[string]string = make(map[string]string)
-    if name == "" {
-        errors["name"] = "Name is required"
+func HandleDeleteContact(c echo.Context) error {
+    id, err := strconv.Atoi(c.Param("id"))
+    if err != nil {
+        return c.String(http.StatusBadRequest, "")
     }
 
-    if email == "" {
-        errors["email"] = "Email is required"
+    err = database.DeleteContact(id)
+
+    return c.String(http.StatusOK, "")
+}
+
+func HandleEditContact(c echo.Context) error {
+    idStr := c.Param("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        return c.String(http.StatusBadRequest, "")
     }
 
-    if  addressLine1 == "" {
-        errors["addr1"] = "Address Line 1 is required"
+    contact, err := database.GetContact(id)
+    if err != nil {
+        c.Logger().Errorf("could not retrieve contact: %+v", err)
+        return c.String(http.StatusInternalServerError, "")
     }
 
-    if addressLine2 == "" {
-        errors["addr2"] = "Address Line 2 is required"
+    return c.Render(http.StatusOK, "new-contact", NewContactPage{
+        Header: Header{
+            Title: "Edit Contact",
+        },
+        Contact: contact,
+        Existing: true,
+        Errors: map[string]string{},
+    })
+}
+
+func HandleSaveContact(c echo.Context) error {
+    contact := database.Contact {
+        Name: c.FormValue("name"),
+        Email: c.FormValue("email"),
+        AddressLine1: c.FormValue("addr1"),
+        AddressLine2: c.FormValue("addr2"),
+        Phone: c.FormValue("phone"),
+        Id: -1,
     }
 
-    if phone == "" {
-        errors["phone"] = "Phone is required"
+    errors, err := contact.Save()
+
+    if err != nil {
+        c.Logger().Errorf("could not save contact: %+v", err)
+        return c.String(http.StatusInternalServerError, "")
     }
 
     if len(errors) > 0 {
@@ -107,26 +96,53 @@ func HandleCreateContact(c echo.Context) error {
             Header: Header{
                 Title: "Create Contact",
             },
-            Contact: &Contact{
-                Name: name,
-                AddressLine1: addressLine1,
-                AddressLine2: addressLine2,
-                Email: email,
-                Phone: phone,
-            },
+            Contact: &contact,
             Existing: false,
             Errors: errors,
         })
     }
 
-    _, err := database.Db.Exec(`INSERT INTO contacts (name, email, addressLine1, addressLine2, phone) VALUES (?, ?, ?, ?, ?)`, name, email, addressLine1, addressLine2, phone)
+    return c.Redirect(http.StatusOK, "/")
+}
 
+func HandleCreateContact(c echo.Context) error {
+    contact := database.Contact {
+        Name: c.FormValue("name"),
+        Email: c.FormValue("email"),
+        AddressLine1: c.FormValue("addr1"),
+        AddressLine2: c.FormValue("addr2"),
+        Phone: c.FormValue("phone"),
+        Id: -1,
+    }
+
+    idStr := c.Param("id")
+    if idStr != "" {
+        idInt, err := strconv.Atoi(idStr)
+        if err != nil {
+            return c.String(http.StatusBadRequest, "")
+        }
+        contact.Id = idInt
+    }
+
+    errors, err := contact.Save()
     if err != nil {
         c.Logger().Errorf("could not insert into db: %+v", err)
         return c.String(http.StatusInternalServerError, "")
     }
 
-    return c.Redirect(http.StatusFound, "/")
+    if len(errors) > 0 {
+        c.Logger().Errorf("missing required fields")
+        return c.Render(http.StatusOK, "new-contact", NewContactPage{
+            Header: Header{
+                Title: "Create Contact",
+            },
+            Contact: &contact,
+            Existing: false,
+            Errors: errors,
+        })
+    }
+
+    return c.Redirect(http.StatusSeeOther, "/")
 }
 
 func HandleNewContact(c echo.Context) error {
@@ -151,18 +167,3 @@ func HandleHelp(c echo.Context) error {
         Title: "Help",
     })
 }
-
-func HandleDeleteName(c echo.Context) error {
-
-    if database.Db == nil {
-        c.Logger().Error("db is nil")
-        return c.String(http.StatusTeapot, "youu suck")
-    }
-
-    name := c.Param("name")
-    _, _ = database.Db.Exec("DELETE FROM users WHERE name = ?", name)
-
-    return c.Render(200, "name", nil)
-
-}
-
