@@ -1,23 +1,48 @@
 {{block "contacts" .}}
 <div hx-boost="true" id="content">
     <a href="/contacts/new">Create Contact</a>
-    <div class="flex-row">
-        <div class="flex gap-2">
+    <p class="m-2">
+        <form action="/contacts" method="get">
+            <label for="search">Search</label>
+            <input id="search" {{ if .QueryString }} value="{{ .QueryString }}" {{end}} name="q" placeholder="Search"
+                hx-get="/contacts"
+                hx-trigger="change, keyup delay:200ms changed"
+                hx-target="#contacts"
+                hx-push-url="true"
+                />
+            <input type="submit" value="Search"/>
+        </form>
+    </p>
+    {{ template "contact-list" . }}
+</div>
+{{end}}
+
+{{block "contact-list" .}}
+    <div id="contacts" class="flex">
+        <div class="flex-row gap-2">
+            <div>Select</div>
             <div>Name</div>
             <div>Phone</div>
             <div>Email</div>
+            <div>Edit</div>
+            <div>Delete</div>
         </div>
         {{range .Contacts}}
-            <div class="flex gap-2" id="contact-{{.Id}}">
+            <div class="contact-item flex-row gap-2">
+                <div>
+                    <input type="checkbox" name="contact-selected" value="{{.Id}}" />
+                </div>
                 <div>{{.Name}}</div>
                 <div>{{.Phone}}</div>
                 <div>{{.Email}}</div>
                 <a href="/contacts/{{.Id}}">Edit</a>
-                <button hx-swap="outerHTML" hx-target="#contact-{{.Id}}" hx-delete="/contacts/{{.Id}}">Delete</button>
+                <button
+                    hx-swap="outerHTML swap:1s"
+                    hx-target="closest .contact-item"
+                    hx-delete="/contacts/{{.Id}}">Delete</button>
             </div>
         {{end}}
     </div>
-</div>
 {{end}}
 
 {{block "new-contact" .}}
@@ -40,14 +65,24 @@
                 </p>
 
                 <p class="m-2">
-                    <label for="email">Email</label>
-                    <input name="email" {{if .Contact}}value="{{ .Contact.Email }}" {{end}} placeholder="example@foo.com" />
+                    <div class="flex-row">
+                        <label for="email">Email</label>
+                        <input name="email"
+                            {{if .Contact}}value="{{ .Contact.Email }}" {{end}}
+                            placeholder="example@foo.com"
+                            hx-post="/contacts/email"
+                            hx-trigger="keyup changed"
+                            hx-target="next .error"
+                            hx-push-url="false"
+                        />
 
-                    {{ if .Errors.email }}
-                    <div class="error">
-                            {{ .Errors.email }}
+                        <div class="error">
+                            {{ if .Errors.addr1 }}
+                                {{ .Errors.addr1 }}
+                            {{end}}
+                        </div>
+
                     </div>
-                    {{end}}
                 </p>
 
 

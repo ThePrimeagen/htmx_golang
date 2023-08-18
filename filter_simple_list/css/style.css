@@ -1,0 +1,25 @@
+
+.contact-item.htmx-swapping {
+    opacity: 0;
+    transition: all 1s ease;
+}
+
+.flex {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+
+.error {
+    color: red;
+}
+
+
+

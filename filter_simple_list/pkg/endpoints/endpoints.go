@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"net/http"
+	"net/mail"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
@@ -15,6 +16,7 @@ type Header struct {
 type ContactPage struct {
     Header
     Contacts []database.Contact
+    QueryString string
 }
 
 type NewContactPage struct {
@@ -24,30 +26,88 @@ type NewContactPage struct {
     Errors map[string]string
 }
 
+func valid(email string) bool {
+    _, err := mail.ParseAddress(email)
+    return err == nil
+}
+
+func HandleValidateEmail(c echo.Context) error {
+    email := c.FormValue("email")
+    if email == "" {
+        return c.String(http.StatusOK, "email is required")
+    }
+    if !valid(email) {
+        return c.String(http.StatusOK, "invalid email")
+    }
+
+    hasEmail, err := database.HasEmail(email)
+    c.Logger().Errorf("hasEmail %t and err %+v", hasEmail, err)
+    if err != nil || !hasEmail {
+        return c.String(http.StatusOK, "")
+    }
+
+    return c.String(http.StatusOK, "email already exists")
+}
 
 func HandleIndex(c echo.Context) error {
-    contacts, err := database.GetContacts()
+    q := c.QueryParam("q")
+
+    var contacts []database.Contact
+    var err error
+
+
+    if q != "" {
+        contacts, err = database.FilterContacts(q)
+    } else {
+        contacts, err = database.GetContacts()
+    }
+
     if err != nil {
+        c.Logger().Errorf("could not retrieve contacts: %+v", err)
         return c.String(http.StatusInternalServerError, "unable to get contacts")
     }
 
+    trigger := c.Request().Header.Get("HX-Trigger")
+    c.Logger().Errorf("trigger %s", trigger)
+    if trigger == "search" {
+        return c.Render(200, "contact-list", ContactPage {
+            Contacts: contacts,
+        });
+
+    }
     return c.Render(200, "index.html", ContactPage {
         Header: Header{
             Title: "Contacts",
         },
         Contacts: contacts,
+        QueryString: q,
     })
 }
 
 func HandleDeleteContact(c echo.Context) error {
-    id, err := strconv.Atoi(c.Param("id"))
-    if err != nil {
+    id := c.Param("id")
+
+    if id != "" {
+        idInt, err := strconv.Atoi(id)
+        if err != nil {
+            c.Logger().Errorf("could not convert id to int: %+v", err)
+            return c.String(http.StatusBadRequest, "")
+        }
+        err = database.DeleteContact(idInt)
+        if err != nil {
+            return c.String(http.StatusInternalServerError, "")
+        }
+
+        return c.String(http.StatusOK, "")
+    }
+
+    manyIds := c.Param("selected_contact_ids")
+    if manyIds == "" {
+        c.Logger().Errorf("both ids and manyIds were empty")
         return c.String(http.StatusBadRequest, "")
     }
 
-    err = database.DeleteContact(id)
-
-    return c.String(http.StatusOK, "")
+    return c.String(http.StatusBadRequest, "")
 }
 
 func HandleEditContact(c echo.Context) error {

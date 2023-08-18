@@ -30,6 +30,7 @@ func main() {
     e := echo.New()
     e.Renderer = endpoints.NewTemplateRenderer(tmpl)
     e.Use(middleware.Logger())
+    e.Static("/css", "css");
 
     e.GET("/", endpoints.HandleIndex)
 
@@ -40,6 +41,7 @@ func main() {
     e.DELETE("/contacts/:id", endpoints.HandleDeleteContact)
     e.GET("/contacts/:id", endpoints.HandleEditContact)
     e.PUT("/contacts/:id", endpoints.HandleCreateContact)
+    e.POST("/contacts/email", endpoints.HandleValidateEmail)
 
     e.GET("/settings", endpoints.HandleSettings)
     e.GET("/help", endpoints.HandleHelp)

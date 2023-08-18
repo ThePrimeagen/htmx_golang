@@ -80,6 +80,51 @@ func GetContact(id int) (*Contact, error) {
     }, nil
 }
 
+func FilterContacts(q string) ([]Contact, error) {
+    res, err := Db.Query(`
+SELECT *
+FROM contacts
+WHERE (
+    name LIKE $1 or
+    email LIKE $1 or
+    addressLine1 LIKE $1 or
+    addressLine2 LIKE $1 or
+    phone LIKE $1
+)` , "%" + q + "%")
+
+    if err != nil {
+        return nil, fmt.Errorf("unable to query db: %+v", err)
+    }
+
+    var contacts []Contact = make([]Contact, 0)
+    for res.Next() {
+        var name string
+        var email string
+        var addressLine1 string
+        var addressLine2 string
+        var phone string
+        var id int
+
+        err := res.Scan(&id, &name, &email, &addressLine1, &addressLine2, &phone)
+        if err != nil {
+            return nil, fmt.Errorf("could not scan db row: %+v", err)
+        }
+
+        contacts = append(contacts, Contact{
+            Name: name,
+            AddressLine1: addressLine1,
+            AddressLine2: addressLine2,
+            Phone: phone,
+            Email: email,
+            Id: id,
+        })
+    }
+
+    res.Close()
+
+    return contacts, nil
+}
+
 func GetContacts() ([]Contact, error) {
     res, err := Db.Query("SELECT * FROM contacts")
     if err != nil {
@@ -113,6 +158,18 @@ func GetContacts() ([]Contact, error) {
     res.Close()
 
     return contacts, nil
+}
+
+func HasEmail(email string) (bool, error) {
+    res := Db.QueryRow("SELECT id FROM contacts WHERE email = ?", email)
+
+    var id int
+    err := res.Scan(&id)
+    if err != nil {
+        return false, fmt.Errorf("unable to query db: %+v", err)
+    }
+
+    return id > 0, nil
 }
 
 func (c *Contact) Save() (ErrorMap, error) {
