@@ -24,3 +24,11 @@
     {{ template "main-board" . }}
     <script>window.controls.start(document.getElementById("main-menu"), document.getElementById("conway"))</script>
 {{ end }}
+
+{{ block "saved-conway" . }}
+    {{ if . }}
+        <p>implement this you bastard</p>
+    {{ else }}
+        <p>No saved conways.  Please create some and start from there!</p>
+    {{ end }}
+{{ end }}
