@@ -1,5 +1,4 @@
-{{ block "menu" . }}
-
+{{ block "main-controls" . }}
 <form hx-post="/save" id="main-menu">
     <input disabled type="text" class="seed" name="seed" value="0x0" />
     <input disabled type="text" class="frame-count" name="frame-count" value="0" />
@@ -8,6 +7,20 @@
     <button disabled onclick="window.controls.pause()" type="button" class="pause">Pause</button>
     <button type="submit">Save</button>
 </form>
-
 {{end}}
 
+{{ block "main-board" . }}
+<div id="conway">
+    {{range $y := loop 0 49 }}
+        {{range $x := loop 0 49 }}
+            <span class="cell-{{ $y }}-{{ $x }} cell dead" hx-on:mousedown="controls.toggleCell(this)"></span>
+        {{- end}}
+    {{- end}}
+</div>
+{{ end }}
+
+{{ block "main-conway" . }}
+    {{ template "main-controls" . }}
+    {{ template "main-board" . }}
+    <script>window.controls.start(document.getElementById("main-menu"), document.getElementById("conway"))</script>
+{{ end }}

@@ -32,12 +32,6 @@
 </style>
     </head>
     <body>
-        {{ template "menu" . }}
-
-        {{ template "conway-main-controls" . }}
-        <hr />
-        {{ template "board" . }}
-
-        <script>window.controls.start(document.getElementById("main-menu"), document.getElementById("conway"))</script>
+        {{ template "main-conway" . }}
     </body>
 </html>
