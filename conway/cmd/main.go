@@ -18,10 +18,23 @@ func (t *TemplateRenderer) Render(w io.Writer, name string, data interface{}, c 
     return t.templates.ExecuteTemplate(w, name, data)
 }
 
-
 func main() {
 
-    tmpls, err := template.ParseGlob("public/views/*.html")
+    funcMap := template.FuncMap{
+        "loop": func(from, to int) <-chan int {
+            ch := make(chan int)
+            go func() {
+                for i := from; i <= to; i++ {
+                    ch <- i
+                }
+                close(ch)
+            }()
+            return ch
+        },
+    }
+
+    tmpls, err := template.New("").Funcs(funcMap).ParseGlob("public/views/*.html")
+
     if err != nil {
         log.Fatalf("couldn't initialize templates: %w", err)
     }
@@ -32,7 +45,7 @@ func main() {
     }
 
     e.Use(middleware.Logger())
-    e.Static("/scripts", "scripts");
+    e.Static("/dist", "dist");
 
     e.GET("/", func(c echo.Context) error {
         return c.Render(200, "index.html", nil)

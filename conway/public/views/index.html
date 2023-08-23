@@ -6,29 +6,38 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link href="css/style.css" rel="stylesheet">
         <script src="https://unpkg.com/htmx.org@1.9.4" integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV" crossorigin="anonymous"></script>
-        <script src="/scripts/conway.js"></script>
+        <script src="/dist/bundle.js"></script>
 <style>
 #conway {
     display: grid;
+    grid-template-columns: repeat(50, 1fr);
 }
 
 .dead {
-    background-color: #777;
-    ratio: 1
+    background-color: #EEE;
 }
 
 .alive {
-    background-color: #EEE;
-    aspect-ratio: 1
+    background-color: #333;
+}
+
+.cell {
+    aspect-ratio: 1;
+}
+
+.cell:hover {
+    background-color: #777;
 }
 
 </style>
     </head>
     <body>
         {{ template "menu" . }}
+
+        {{ template "conway-main-controls" . }}
         <hr />
-        <div id="conway">
-            <div id="content">
-        </div>
+        {{ template "board" . }}
+
+        <script>window.controls.start(document.getElementById("main-menu"), document.getElementById("conway"))</script>
     </body>
 </html>
