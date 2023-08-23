@@ -5,6 +5,7 @@
         <form action="/contacts" method="get">
             <label for="search">Search</label>
             <input id="search" {{ if .QueryString }} value="{{ .QueryString }}" {{end}} name="q" placeholder="Search"
+                hx-push-url=true
                 hx-get="/contacts"
                 hx-trigger="change, keyup delay:200ms changed"
                 hx-target="#contacts"
@@ -52,7 +53,7 @@
     <body>
         {{ template "nav" . }}
         <div id="content">
-            <form hx-target="body" hx-push-url="true" {{if .Existing }}hx-put="/contacts/{{ .Contact.Id }}"{{else}}hx-post="/contacts/new"{{end}}>
+            <form hx-target="body" hx-push-url="true" {{if .Existing }} hx-put="/contacts/{{ .Contact.Id }}" {{else}}hx-post="/contacts/new"{{end}}>
                 <p class="m-2">
                     <label for="name">Name</label>
                     <input name="name" {{if .Contact}}value="{{ .Contact.Name }}" {{end}} placeholder="John Doe" />
@@ -71,7 +72,7 @@
                             {{if .Contact}}value="{{ .Contact.Email }}" {{end}}
                             placeholder="example@foo.com"
                             hx-post="/contacts/email"
-                            hx-trigger="keyup changed"
+                            hx-trigger="keyup changed delay:200ms"
                             hx-target="next .error"
                             hx-push-url="false"
                         />

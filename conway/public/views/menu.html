@@ -1,0 +1,13 @@
+{{ block "menu" . }}
+
+<form hx-post="/save" class="menu">
+    <input onchange="generate()" type="number" id="rows" name="rows" value="10" />
+    <input onchange="generate()" type="number" id="cols" name="cols" value="10" />
+    <input onchange="generate()" type="text" id="seed" name="seed" value="nthghtdygdcrtdtrk" />
+    <input disabled type="text" id="frame-count" name="frame-count" value="0" />
+    <button onclick="generate()" type="button" id="generate">Generate</button>
+    <button type="submit">Save</button>
+</form>
+
+{{end}}
+
