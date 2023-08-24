@@ -10,6 +10,10 @@ const spots = [
     [1, 1],
 ]
 
+export function generatePreview(container: HTMLElement, seed: string, columns: number): void {
+    const map = seedToDataMap(seed, columns);
+}
+
 function seedToString(data: number[][]): string {
     const colSize = data[0].length;
     const length = data.length * colSize;

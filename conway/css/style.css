@@ -1,6 +1,6 @@
-#conway {
-    display: grid;
-    grid-template-columns: repeat(50, 1fr);
+.menu {
+    display: flex;
+    gap: 1rem;
 }
 
 .dead {

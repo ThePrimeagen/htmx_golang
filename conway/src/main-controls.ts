@@ -1,133 +1,97 @@
 import { Conway } from "./conway";
 
-let controls: MainControls | undefined = undefined;
+type Grid = {
+    updateGrid(data: number[][]): void;
+    getData(): number[][];
+}
 
-let running = false;
 let paceMS = 250;
+let running = false;
+let grid: Grid | undefined = undefined;
+let seedInput: HTMLInputElement | undefined = undefined;
+let seedInputAt: HTMLInputElement | undefined = undefined;
+let frameCount: HTMLElement | undefined = undefined;
+let frameCountInput: HTMLInputElement | undefined = undefined;
+let pauseElement: HTMLButtonElement | undefined = undefined;
+let paceElement: HTMLInputElement | undefined = undefined;
+let conway: Conway | undefined = undefined;
 
-function run() {
+export function initControls(menu: HTMLElement, columns: number, g: Grid) {
+    seedInput = menu.querySelector(".seed-input") as HTMLInputElement;
+    seedInputAt = menu.querySelector(".seed-input-at") as HTMLInputElement;
+    frameCount = menu.querySelector(".frame-count") as HTMLElement;
+    frameCountInput = menu.querySelector(".frame-count-input") as HTMLInputElement;
+    pauseElement = menu.querySelector(".pause") as HTMLButtonElement;
+    paceElement = menu.querySelector(".pace") as HTMLInputElement;
+    paceElement.onchange = () => pace(paceElement);
+    paceElement.value = paceMS.toString();
+
+    if (!conway) {
+        conway = new Conway(columns);
+    }
+    grid = g;
+}
+
+export function seed(seed: string, columns: number) {
+    if (!conway) {
+        throw new Error("must call initControls first");
+    }
+
+    conway.setSeed(seed, columns);
+}
+
+export function pace(input?: HTMLInputElement) {
+    if (!input) {
+        return;
+    }
+
+    const nextPace = parseInt(input.value);
+    if (isNaN(nextPace)) {
+        return;
+    }
+
+    paceMS = nextPace;
+}
+
+function runLoop() {
     if (!running) {
         return;
     }
     tick();
-    setTimeout(run, paceMS);
+    setTimeout(runLoop, paceMS);
 }
 
-export function start(menu: HTMLElement, cells: HTMLElement) {
-    if (running) {
+export function run(): void {
+    if (running || !conway || !grid || !seedInput || !seedInputAt) {
         return;
     }
 
-    if (!controls) {
-        controls = new MainControls(
-            50,
-            menu, cells);
-    } else {
-        running = true;
-    }
+    pauseElement?.removeAttribute("disabled");
+    running = true;
 
-    controls.init();
-    run();
+    conway.data = grid.getData();
+
+    const seedString = conway.getSeedString();
+    seedInput.value = seedString;
+    seedInputAt.value = seedString;
+
+    runLoop();
 }
 
-export function tick() {
-    if (controls) {
-        controls.tick();
-    }
-}
-
-export function pause() {
+export function pause(): void {
     running = false;
-    controls?.init();
+    pauseElement?.toggleAttribute("disabled");
 }
 
-export function pace(input: HTMLInputElement) {
-    paceMS = parseInt(input.value);
-}
-
-
-export function toggleCell(cell: HTMLElement) {
-    if (controls) {
-        controls.toggleCell(cell);
-    }
-}
-
-class MainControls {
-    conway: Conway;
-
-    private seed: HTMLInputElement;
-    private frameCount: HTMLInputElement;
-    private pause: HTMLButtonElement;
-
-    constructor(size: number, menu: HTMLElement, private cells: HTMLElement) {
-        this.conway = new Conway(size);
-        this.seed = menu.querySelector(".seed") as HTMLInputElement;
-        this.frameCount = menu.querySelector(".frame-count") as HTMLInputElement;
-        this.pause = menu.querySelector(".pause") as HTMLButtonElement;
+function tick() {
+    if (!conway || !frameCount || !frameCountInput || !grid || !seedInputAt) {
+        return;
     }
 
-    updateSeed(seedStr: string) {
-        this.seed.value = seedStr;
-    }
+    conway.tick();
+    frameCount.innerText = conway.tickCount.toString();
+    frameCountInput.value = conway.tickCount.toString();
 
-    init() {
-        const data: number[][] = new Array(this.conway.height).fill(0).map(() => new Array(this.conway.width).fill(0));
-        for (let r = 0; r < this.conway.data.length; ++r) {
-            const row = this.conway.data[r];
-            for (let col = 0; col < row.length; ++col) {
-                const cell = this.cells.querySelector(`.cell-${r}-${col}`) as HTMLElement;
-
-                if (cell) {
-                    data[r][col] = cell.classList.contains("alive") ? 1 : 0;
-                }
-            }
-        }
-
-        this.conway.setData(data);
-        this.seed.value = this.conway.getSeedString();
-    }
-
-    tick() {
-        if (this.pause.hasAttribute("disabled")) {
-            this.pause.removeAttribute("disabled");
-        }
-
-        this.conway.tick();
-        this.frameCount.value = this.conway.tickCount.toString();
-
-        for (let r = 0; r < this.conway.data.length; ++r) {
-            const row = this.conway.data[r];
-            for (let col = 0; col < row.length; ++col) {
-                const cell = this.cells.querySelector(`.cell-${r}-${col}`) as HTMLElement;
-
-                if (cell) {
-                    this.setCell(cell, row[col]);
-                }
-            }
-        }
-    }
-
-    toggleCell(cell: HTMLElement) {
-        if (cell.classList.contains("dead")) {
-            cell.classList.remove("dead");
-            cell.classList.add("alive");
-        } else {
-            cell.classList.add("dead");
-            cell.classList.remove("alive");
-        }
-    }
-
-    setCell(cell: HTMLElement, value: number) {
-        const isDead = cell.classList.contains("dead");
-        const toAlive = value === 1;
-
-        if (isDead && toAlive) {
-            cell.classList.remove("dead");
-            cell.classList.add("alive");
-        } else if (!isDead && !toAlive) {
-            cell.classList.add("dead");
-            cell.classList.remove("alive");
-        }
-    }
-
+    grid.updateGrid(conway.data);
+    seedInputAt.value = conway.getSeedString();
 }

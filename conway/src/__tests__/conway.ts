@@ -25,3 +25,12 @@ test("conway", () => {
 });
 
 
+type SubFoo = string
+type OtherFoo = number
+type Foo = SubFoo | OtherFoo
+
+function filterSubfoo(foo: Foo): foo is SubFoo {
+    return typeof foo === "string";
+}
+
+

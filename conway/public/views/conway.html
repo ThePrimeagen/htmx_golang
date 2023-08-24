@@ -1,34 +1,48 @@
 {{ block "main-controls" . }}
-<form hx-post="/save" id="main-menu">
-    <input disabled type="text" class="seed" name="seed" value="0x0" />
-    <input disabled type="text" class="frame-count" name="frame-count" value="0" />
-    <label for="pace">Speed (ms)</label><input hx-on:change="window.controls.pace(this)" value="250" type="number" name="pace">
-    <button onclick="window.controls.start()" type="button" id="generate">Start</button>
-    <button disabled onclick="window.controls.pause()" type="button" class="pause">Pause</button>
-    <button type="submit">Save</button>
+<form id="main-menu">
+    <div class="menu">
+        <label for="frame-count">Frame Count</label><span class="frame-count">0</span>
+
+        <input hidden disabled type="text" class="frame-count-input" name="frame-count" value="0" />
+        <input hidden disabled type="text" class="seed-input" name="seed" value="0" />
+        <input hidden disabled type="text" class="seed-input-at" name="seed" value="0" />
+
+        <label for="pace">Speed (ms)</label><input type="number" class="pace" name="pace">
+
+        <button onclick="window.controls.run()" type="button" id="generate">Start</button>
+        <button disabled onclick="window.controls.pause()" type="button" class="pause">Pause</button>
+
+        <button hx-post="/save" type="submit">Save Original</button>
+        <button hx-post="/saveAt" type="submit">Save At Frame</button>
+
+        <div hx-on:change="console.log('changed')" class="message"></div>
+
+    </div>
 </form>
 {{end}}
 
-{{ block "main-board" . }}
-<div id="conway">
-    {{range $y := loop 0 49 }}
-        {{range $x := loop 0 49 }}
-            <span class="cell-{{ $y }}-{{ $x }} cell dead" hx-on:mousedown="controls.toggleCell(this)"></span>
-        {{- end}}
-    {{- end}}
-</div>
-{{ end }}
-
 {{ block "main-conway" . }}
     {{ template "main-controls" . }}
-    {{ template "main-board" . }}
-    <script>window.controls.start(document.getElementById("main-menu"), document.getElementById("conway"))</script>
+    <div id="conway-area"></div>
+    <script>
+        window.grid.initGrid(document.getElementById("conway-area"), 40);
+        window.controls.initControls(document.getElementById("main-menu"), 40, window.grid);
+
+        {{ if .Conway }}
+            window.controls.seed({{ .Conway.Seed }}, 40);
+        {{ end }}
+
+    </script>
 {{ end }}
 
 {{ block "saved-conway" . }}
-    {{ if . }}
-        <p>implement this you bastard</p>
+    {{ if .Error }}
+        <p>{{ .Error }}</p>
     {{ else }}
-        <p>No saved conways.  Please create some and start from there!</p>
+        {{ range .Conways }}
+            <div id="{{.Id}}" class="saved-conway">
+                {{ .Id }}
+            </div>
+        {{ end }}
     {{ end }}
 {{ end }}
