@@ -26,6 +26,31 @@ func GetConway(id int) (*Conway, error) {
     }, nil
 }
 
+func SaveConway(seed string, columns int) (int, error) {
+
+    res, err := Db.Exec("INSERT INTO conway (seed, columns) VALUES (?, ?) RETURNING id", seed, columns)
+    if err != nil {
+        return 0, fmt.Errorf("couldn't insert conway: %w", err)
+    }
+
+    id, err := res.LastInsertId()
+    if err != nil {
+        return 0, fmt.Errorf("could get the id: %w", err)
+    }
+
+    return int(id), nil
+}
+
+func UpdateConway(seed string, columns, id int) error {
+
+    _, err := Db.Exec("UPDATE conway SET seed = ?, columns = ? WHERE id = ?", seed, columns, id)
+    if err != nil {
+        return fmt.Errorf("couldn't insert conway: %w", err)
+    }
+
+    return nil
+}
+
 func GetSaved() ([]Conway, error) {
 
     rows, err := Db.Query("SELECT * FROM conway")

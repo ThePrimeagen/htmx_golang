@@ -3,6 +3,7 @@ import { Conway } from "./conway";
 type Grid = {
     updateGrid(data: number[][]): void;
     getData(): number[][];
+    onUpdate(cb: () => void): void;
 }
 
 let paceMS = 250;
@@ -30,6 +31,15 @@ export function initControls(menu: HTMLElement, columns: number, g: Grid) {
         conway = new Conway(columns);
     }
     grid = g;
+    grid.onUpdate(() => {
+        if (!conway || !seedInput || !seedInputAt) {
+            return;
+        }
+
+        const seedString = conway.getSeedString();
+        seedInput.value = seedString;
+        seedInputAt.value = seedString;
+    });
 }
 
 export function seed(seed: string, columns: number) {

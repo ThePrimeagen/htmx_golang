@@ -9,11 +9,13 @@ import (
 
 type IndexPage struct {
     Conway *database.Conway
+    Columns int
 }
 
 func baseIndex(c echo.Context) error {
-    return c.Render(200, "index", IndexPage{
+    return c.Render(200, "index.html", IndexPage{
         Conway: nil,
+        Columns: 40,
     })
 }
 
@@ -29,8 +31,9 @@ func Index(c echo.Context) error {
         return baseIndex(c)
     }
 
-    return c.Render(200, "index", IndexPage{
+    return c.Render(200, "index.html", IndexPage{
         Conway: conway,
+        Columns: 40,
     })
 }
 

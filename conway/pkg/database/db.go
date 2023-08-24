@@ -19,8 +19,8 @@ func InitDB(url string) error {
     // Real gross, but guess what, we are doing database initialization here
     db.Exec(`CREATE TABLE IF NOT EXISTS conway (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            seed TEXT NOT NULL
-            columns INTEGER NOT NULL,
+            seed TEXT NOT NULL,
+            columns INTEGER NOT NULL
         )`)
 
     Db = db

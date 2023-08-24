@@ -3,9 +3,10 @@
     <div class="menu">
         <label for="frame-count">Frame Count</label><span class="frame-count">0</span>
 
-        <input hidden disabled type="text" class="frame-count-input" name="frame-count" value="0" />
-        <input hidden disabled type="text" class="seed-input" name="seed" value="0" />
-        <input hidden disabled type="text" class="seed-input-at" name="seed" value="0" />
+        <input hidden type="text" class="frame-count-input" name="frame-count" value="0" />
+        <input hidden type="text" class="seed-input" name="seed" value="0" />
+        <input hidden type="text" class="seed-input-at" name="seed-at" value="0" />
+        <input hidden type="text" name="columns" value="{{ .Columns }}" />
 
         <label for="pace">Speed (ms)</label><input type="number" class="pace" name="pace">
 
@@ -25,8 +26,8 @@
     {{ template "main-controls" . }}
     <div id="conway-area"></div>
     <script>
-        window.grid.initGrid(document.getElementById("conway-area"), 40);
-        window.controls.initControls(document.getElementById("main-menu"), 40, window.grid);
+        window.grid.initGrid(document.getElementById("conway-area"), {{ .Columns }});
+        window.controls.initControls(document.getElementById("main-menu"), {{ .Columns }}, window.grid);
 
         {{ if .Conway }}
             window.controls.seed({{ .Conway.Seed }}, 40);

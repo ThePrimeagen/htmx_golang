@@ -44,7 +44,7 @@ func main() {
 
     url := os.Getenv("DB_URL")
     if url == "" {
-        url = "/tmp/conway.db"
+        url = "file:///tmp/conway.db"
     }
 
     err = database.InitDB(url)
@@ -61,20 +61,10 @@ func main() {
     e.Static("/dist", "dist");
     e.Static("/css", "css");
 
-    e.GET("/", func(c echo.Context) error {
-        return c.Render(200, "index.html", nil)
-    })
-
+    e.GET("/", pages.Index)
     e.GET("/saved", pages.Saved)
-
-    e.POST("/save", func(c echo.Context) error {
-        return c.Render(200, "saved-msg", nil)
-    })
-
-    e.POST("/saveAt", func(c echo.Context) error {
-        return c.Render(200, "saved-msg", nil)
-    })
-
+    e.POST("/save", pages.SaveConway(false))
+    e.POST("/saveAt", pages.SaveConway(true))
 
     e.Logger.Fatal(e.Start(":42069"))
 }

@@ -1,4 +1,4 @@
-import { Conway } from '../conway';
+import { Conway, seedToDataMap, seedToString } from '../conway';
 
 test("conway", () => {
     const conway = new Conway(3);
@@ -24,13 +24,23 @@ test("conway", () => {
 
 });
 
+test("seed value", () => {
 
-type SubFoo = string
-type OtherFoo = number
-type Foo = SubFoo | OtherFoo
+    const seed = "490";
+    const values = seedToDataMap(seed, 3);
 
-function filterSubfoo(foo: Foo): foo is SubFoo {
-    return typeof foo === "string";
-}
+    console.log(values);
+    expect(values).toEqual([
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 0],
+    ]);
 
+    const seedStr = seedToString([
+        [0, 1, 0],
+        [0, 1, 0],
+        [0, 1, 0],
+    ]);
 
+    expect(seedStr).toEqual(seed);
+});

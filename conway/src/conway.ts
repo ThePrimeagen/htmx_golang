@@ -10,23 +10,31 @@ const spots = [
     [1, 1],
 ]
 
+/*
 export function generatePreview(container: HTMLElement, seed: string, columns: number): void {
     const map = seedToDataMap(seed, columns);
 }
+*/
 
-function seedToString(data: number[][]): string {
-    const colSize = data[0].length;
-    const length = data.length * colSize;
+export function seedToString(data: number[][]): string {
+    const size = data.length;
+    const length = size * size;
 
     let str = "";
-    for (let i = 0; i < length + 7; i += 8) {
+    for (let i = 0; i < length; i += 4) {
         let value = 0;
-        for (let bit = 7; bit >= 0; --bit) {
-            const row = data[Math.floor(i / colSize)];
+        for (let bit = 3; bit >= 0; --bit) {
+            const offset = (i + 3 - bit);
+            if (offset >= length) {
+                continue;
+            }
+
+            const row = data[Math.floor(i / size)];
             if (!row) {
                 break;
             }
-            value |= row[i % colSize] << bit;
+
+            value |= row[offset % size] << bit;
         }
 
         str += value.toString(16);
@@ -34,16 +42,23 @@ function seedToString(data: number[][]): string {
     return str;
 }
 
-function seedToDataMap(data: string, rowSize: number, colSize: number): number[][] {
-    const out = new Array(rowSize).fill(0).map(() => new Array(colSize).fill(0));
+export function seedToDataMap(data: string, columns: number): number[][] {
+    const out = new Array(columns).fill(0).map(() => new Array(columns).fill(0));
+    const length = columns * columns;
 
     for (let i = 0; i < data.length; ++i) {
         const s = data[i];
         const value = parseInt(s, 16);
 
-        for (let bit = 7; bit >= 0; --bit) {
-            const b = value & (1 << bit);
-            out[Math.floor(i / colSize)][i % colSize] = b;
+        // convert nibble to bit
+        for (let bit = 3; bit >= 0; --bit) {
+            const offset = (i * 4 + 3 - bit);
+            if (offset >= length) {
+                continue;
+            }
+
+            const b = (value & (1 << bit)) > 0;
+            out[Math.floor(offset / columns)][offset % columns] = +b;
         }
     }
 
@@ -96,7 +111,7 @@ export class Conway {
     }
 
     setSeed(seed: string, size: number): void {
-        this.init(size, seedToDataMap(seed, size, size));
+        this.init(size, seedToDataMap(seed, size));
     }
 
     setData(data: number[][]): void {

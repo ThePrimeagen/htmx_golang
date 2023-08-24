@@ -3,6 +3,7 @@ let conwayGrid: HTMLElement | undefined = undefined;
 let columnCount: number = 0;
 const gridData: number[] = [];
 const gridElements: HTMLElement[] = [];
+const callbacks: (() => void)[] = [];
 
 function initGridData(columns: number) {
     gridData.length = 0;
@@ -19,6 +20,12 @@ function toggleCell(cell: HTMLElement) {
     } else {
         cell.classList.add("dead");
         cell.classList.remove("alive");
+    }
+}
+
+export function onUpdate(callback: () => void) {
+    if (!callbacks.includes(callback)) {
+        callbacks.push(callback);
     }
 }
 
@@ -51,6 +58,7 @@ export function initGrid(element: HTMLElement, columns: number) {
         cell.onclick = () => {
             gridData[cellIdx] = gridData[cellIdx] === 1 ? 0 : 1;
             toggleCell(cell);
+            callbacks.forEach(cb => cb());
         }
         div.appendChild(cell);
         gridElements.push(cell);
