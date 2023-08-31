@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title></title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="css/style.css" rel="stylesheet">
+        <script src="https://unpkg.com/htmx.org@1.9.4" integrity="sha384-zUfuhFKKZCbHTY6aRR46gxiqszMk5tcHjsVFxnUo8VMus4kHGVdIYVbOYYNlKmHV" crossorigin="anonymous"></script>
+        <script src="/dist/bundle.js"></script>
+    </head>
+    <body>
+        <div> other content </div>
+        <subscribe-button id="foo" hx-boost="true">
+            <form action="/subscribe" method="post">
+                <input class="email-sub" type="email" name="email" placeholder="Enter a valid email!"/>
+                <button class="submit" type="submit">Subscribe</button>
+            </form>
+        </subscribe-button>
+    </body>
+</html>

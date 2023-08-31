@@ -1,0 +1,22 @@
+.menu {
+    display: flex;
+    gap: 1rem;
+}
+
+.dead {
+    background-color: #EEE;
+}
+
+.alive {
+    background-color: #333;
+}
+
+.cell {
+    aspect-ratio: 1;
+}
+
+.cell:hover {
+    background-color: #777;
+}
+
+
